@@ -10,19 +10,23 @@ import SwiftUI
 struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
+    @State private var userScore = 0
 
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"]
     @State private var correctAnswer = Int.random(in: 0...2)
 
     var body: some View {
         ZStack {
-            Color.blue.edgesIgnoringSafeArea(.all)
+            LinearGradient(gradient: Gradient(colors: [.blue, .black]), startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 30) {
                 VStack {
                     Text("Tap the flag of")
                         .foregroundColor(.white)
                     Text(countries[correctAnswer])
+                        .font(.largeTitle)
+                        .fontWeight(.black)
                         .foregroundColor(.white)
                 }
 
@@ -30,16 +34,25 @@ struct ContentView: View {
                     Button(action: {
                         flagTapped(number)
                     }, label: {
-                        Image(countries[number]).renderingMode(.original)
+                        Image(countries[number])
+                            .renderingMode(.original)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
+                            .shadow(color: .black, radius: 2)
                     })
                 }
+
+                Text("Score: \(userScore)")
+                    .foregroundColor(.white)
+                    .bold()
 
                 Spacer()
             }
         }
         .alert(isPresented: $showingScore, content: {
             Alert(
-                title: Text("Your score is ???"),
+                title: Text(scoreTitle),
+                message: Text("Your score is \(userScore)"),
                 dismissButton: .default(Text("Continue")) {
                     askQuestion()
                 }
@@ -49,9 +62,10 @@ struct ContentView: View {
 
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
-            scoreTitle = "Correct"
+            scoreTitle = "Correct!"
+            userScore += 1
         } else {
-            scoreTitle = "Wrong"
+            scoreTitle = "Wrong! That's the flag for \(countries[number])."
         }
 
         showingScore = true
